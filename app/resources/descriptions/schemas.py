@@ -16,3 +16,10 @@ class DescriptionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class DescriptionDetailResponse(BaseModel):
+    id: int
+    description: str
+    solution: str
+
+    class Config:
+        from_attributes = True

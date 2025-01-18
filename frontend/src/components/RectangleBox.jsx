@@ -1,19 +1,24 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import BottomTextInput from "./BottomTextInput";
 import MessageBox from "./MessageBox";
 import ResponseBox from "./ResponseBox";
 import LoadingDots from "./LoadingDots";
 import Description from "./Description";
 import config from "../config"; // Import server configuration
+import { PuzzleContext } from "../PuzzleContext"; // Import PuzzleContext
 
 function RectangleBox() {
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const lastMessageRef = useRef(null);
+  const { puzzleId } = useContext(PuzzleContext); // Access the puzzle ID from context
 
+  // Fetch response from the server
   const fetchServerResponse = async (message) => {
     try {
-      const response = await fetch(`${config.SERVER_IP}/messages/?message=${encodeURIComponent(message)}`);
+      const response = await fetch(
+        `${config.SERVER_IP}/messages/?message=${encodeURIComponent(message)}&id=${puzzleId}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch response from the server.");
       }
@@ -24,10 +29,9 @@ function RectangleBox() {
       return "Failed to fetch response."; // Fallback message
     }
   };
-  
 
   const handleNewMessage = async (text) => {
-    if (isLoading) return; // Lock input while loading
+    if (isLoading || !puzzleId) return; // Lock input while loading or if puzzleId is not ready
 
     // Add user message
     setConversation((prev) => [...prev, { type: "user", text }]);

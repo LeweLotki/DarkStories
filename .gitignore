@@ -25,3 +25,5 @@ yarn-error.log*
 *vim
 *log
 __pycache__/
+
+notebooks/.ipynb_checkpoints/

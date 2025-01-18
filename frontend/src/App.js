@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import background1 from "./assets/background.png"; // First background image
-import background2 from "./assets/background2.png"; // Second background image
+import React, { useState, useEffect } from "react";
+import RectangleBox from "./components/RectangleBox";
+import Background from "./components/Background";
+import { PuzzleProvider } from "./PuzzleContext";
 
 function App() {
   const [stage, setStage] = useState(1); // Stage 1: initial, Stage 2: zoom-in, Stage 3: background switch
+  const [showRectangle, setShowRectangle] = useState(false); // Control RectangleBox rendering
 
-  const handleClick = () => {
+  const handleBackgroundClick = () => {
     if (stage === 1) {
       setStage(2); // Trigger zoom-in animation
       setTimeout(() => {
@@ -14,38 +16,30 @@ function App() {
     }
   };
 
-  return (
-    <div className="relative h-screen w-full overflow-hidden" onClick={handleClick}>
-      {/* Background 1 */}
-      <div
-        className={`absolute top-0 left-0 h-full w-full ${
-          stage === 2 || stage === 3 ? "animate-zoom" : ""
-        }`}
-        style={{
-          backgroundImage: `url(${background1})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          transform: stage === 3 ? "scale(1.5)" : "scale(1)", // Maintain scale(1.5) during fade-in
-          zIndex: 1,
-        }}
-      ></div>
+  useEffect(() => {
+    if (stage === 3) {
+      // Wait for background2 to fully fade in (1s fade-in duration)
+      const timeout = setTimeout(() => {
+        setShowRectangle(true);
+      }, 1000); // 1 second for the opacity transition
+      return () => clearTimeout(timeout); // Clean up timeout
+    }
+  }, [stage]);
 
-      {/* Background 2 */}
-      <div
-        className={`absolute top-0 left-0 h-full w-full transition-opacity duration-1000 ${
-          stage === 3 ? "opacity-100" : "opacity-0"
-        }`}
-        style={{
-          backgroundImage: `url(${background2})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          transform: "scale(1.5)", // Ensure background2 is zoomed in
-          zIndex: 2,
-        }}
-      ></div>
-    </div>
+  return (
+    <PuzzleProvider>
+      <div className="relative h-screen w-full overflow-hidden" onClick={handleBackgroundClick}>
+        {/* Background */}
+        <Background stage={stage} />
+
+        {/* RectangleBox: Only render when background2 is fully visible */}
+        {showRectangle && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <RectangleBox />
+          </div>
+        )}
+      </div>
+    </PuzzleProvider>
   );
 }
 

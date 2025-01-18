@@ -6,6 +6,7 @@ from app.core.database import Base, engine
 from app.core.config import settings
 
 from app.resources.descriptions.routes import router as descriptions_router
+from app.resources.messages.routes import router as messages_router
 
 import logging
 
@@ -28,3 +29,4 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 app.include_router(descriptions_router, prefix="/descriptions", tags=["Descriptions"])
+app.include_router(messages_router, prefix="/messages", tags=["Messages"])

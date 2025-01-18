@@ -32,6 +32,10 @@ def get_message(
 
     if not response:
         raise HTTPException(status_code=500, detail="Failed to get a response from the fine-tuned model")
-
-    return response
+    
+    valid_responses = ['YES', 'NO', 'PASS']
+    if response in valid_responses:
+        return response
+    else:
+        return 'PASS'
 

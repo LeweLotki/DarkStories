@@ -3,31 +3,42 @@ import BottomTextInput from "./BottomTextInput";
 import MessageBox from "./MessageBox";
 import ResponseBox from "./ResponseBox";
 import LoadingDots from "./LoadingDots";
-import Description from "./Description"; // Import Description component
+import Description from "./Description";
+import config from "../config"; // Import server configuration
 
 function RectangleBox() {
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const lastMessageRef = useRef(null);
 
-  const generateRandomResponse = () => {
-    const responses = ["YES", "NO", "PASS"];
-    return responses[Math.floor(Math.random() * responses.length)];
+  const fetchServerResponse = async (message) => {
+    try {
+      const response = await fetch(`${config.SERVER_IP}/messages/?message=${encodeURIComponent(message)}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch response from the server.");
+      }
+      const data = await response.text(); // The server returns a plain string
+      return data.replace(/^"|"$/g, ""); // Remove quotes from the string
+    } catch (error) {
+      console.error(error);
+      return "Failed to fetch response."; // Fallback message
+    }
   };
+  
 
-  const handleNewMessage = (text) => {
+  const handleNewMessage = async (text) => {
     if (isLoading) return; // Lock input while loading
 
-    setConversation((prev) => [...prev, { type: "user", text }]); // Add user message
+    // Add user message
+    setConversation((prev) => [...prev, { type: "user", text }]);
     setIsLoading(true); // Start loading animation
 
-    // Simulate server delay (0.5 to 1 second)
-    const delay = Math.random() * 500 + 500;
-    setTimeout(() => {
-      const randomResponse = generateRandomResponse();
-      setConversation((prev) => [...prev, { type: "response", text: randomResponse }]); // Add response
-      setIsLoading(false); // Stop loading animation
-    }, delay);
+    // Fetch response from the server
+    const response = await fetchServerResponse(text);
+
+    // Add server response
+    setConversation((prev) => [...prev, { type: "response", text: response }]);
+    setIsLoading(false); // Stop loading animation
   };
 
   useEffect(() => {

@@ -4,7 +4,7 @@ function Footer() {
   return (
     <footer className="bg-gray-800 text-gray-200 text-center py-4">
       <a
-        href="https://github.com/"
+        href="https://github.com/LeweLotki"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center gap-2 text-gray-200 hover:text-white"

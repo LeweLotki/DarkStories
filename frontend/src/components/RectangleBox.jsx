@@ -10,6 +10,7 @@ import { PuzzleContext } from "../PuzzleContext"; // Import PuzzleContext
 function RectangleBox() {
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [messageCount, setMessageCount] = useState(0); // Count of messages sent
   const lastMessageRef = useRef(null);
   const { puzzleId } = useContext(PuzzleContext); // Access the puzzle ID from context
 
@@ -31,7 +32,7 @@ function RectangleBox() {
   };
 
   const handleNewMessage = async (text) => {
-    if (isLoading || !puzzleId) return; // Lock input while loading or if puzzleId is not ready
+    if (isLoading || !puzzleId || messageCount >= 10) return; // Lock input while loading or limit reached
 
     // Add user message
     setConversation((prev) => [...prev, { type: "user", text }]);
@@ -43,6 +44,9 @@ function RectangleBox() {
     // Add server response
     setConversation((prev) => [...prev, { type: "response", text: response }]);
     setIsLoading(false); // Stop loading animation
+
+    // Increment message count
+    setMessageCount((prev) => prev + 1);
   };
 
   useEffect(() => {
@@ -60,7 +64,7 @@ function RectangleBox() {
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {/* Description box */}
         <Description />
-  
+
         {/* Messages */}
         {conversation.map((item, idx) =>
           item.type === "user" ? (
@@ -77,7 +81,7 @@ function RectangleBox() {
             </div>
           )
         )}
-  
+
         {/* Loading animation */}
         {isLoading && (
           <div className="flex justify-start mt-2">
@@ -85,12 +89,21 @@ function RectangleBox() {
           </div>
         )}
       </div>
-  
+
+      {/* Message limit notice */}
+      {messageCount >= 10 && (
+        <div className="text-center text-red-500 font-bold mb-2">
+          You have reached the message limit!
+        </div>
+      )}
+
       {/* Bottom input box */}
-      <BottomTextInput onNewMessage={handleNewMessage} isDisabled={isLoading} />
+      <BottomTextInput
+        onNewMessage={handleNewMessage}
+        isDisabled={isLoading || messageCount >= 10}
+      />
     </div>
   );
-  
 }
 
 export default RectangleBox;

@@ -52,7 +52,10 @@ function RectangleBox() {
   }, [conversation]);
 
   return (
-    <div className="bg-gray-600 w-[1600px] h-[800px] rounded-xl flex flex-col">
+    <div
+      className="bg-gray-600 w-[1000px] h-[700px] rounded-xl flex flex-col"
+      style={{ transform: "translateY(-2.5rem)" }} // Translate RectangleBox upward
+    >
       {/* Scrollable conversation area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {/* Description box */}

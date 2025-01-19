@@ -34,9 +34,14 @@ function App() {
 
         {/* RectangleBox: Only render when background2 is fully visible */}
         {showRectangle && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center"
+            style={{ transform: "translate(5rem, -15rem)" }} // Moves up by 2.5rem
+          >
             <RectangleBox />
           </div>
+
+
         )}
       </div>
     </PuzzleProvider>

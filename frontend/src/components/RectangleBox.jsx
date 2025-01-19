@@ -4,6 +4,7 @@ import MessageBox from "./MessageBox";
 import ResponseBox from "./ResponseBox";
 import LoadingDots from "./LoadingDots";
 import Description from "./Description";
+import WarningMsg from "./WarningMsg"; // Import WarningMsg component
 import config from "../config"; // Import server configuration
 import { PuzzleContext } from "../PuzzleContext"; // Import PuzzleContext
 
@@ -32,7 +33,7 @@ function RectangleBox() {
   };
 
   const handleNewMessage = async (text) => {
-    if (isLoading || !puzzleId || messageCount >= 10) return; // Lock input while loading or limit reached
+    if (isLoading || !puzzleId || messageCount >= 5) return; // Lock input while loading or limit reached
 
     // Add user message
     setConversation((prev) => [...prev, { type: "user", text }]);
@@ -47,6 +48,14 @@ function RectangleBox() {
 
     // Increment message count
     setMessageCount((prev) => prev + 1);
+
+    // Add warning message after reaching limit
+    if (messageCount + 1 === 5) {
+      setConversation((prev) => [
+        ...prev,
+        { type: "warning" }, // Add the warning message
+      ]);
+    }
   };
 
   useEffect(() => {
@@ -71,13 +80,21 @@ function RectangleBox() {
             <div key={idx} className="flex justify-end mb-2">
               <MessageBox message={item.text} />
             </div>
-          ) : (
+          ) : item.type === "response" ? (
             <div
               key={idx}
               ref={idx === conversation.length - 1 ? lastMessageRef : null}
               className="flex justify-start mb-2"
             >
               <ResponseBox response={item.text} />
+            </div>
+          ) : (
+            <div
+              key={idx}
+              ref={idx === conversation.length - 1 ? lastMessageRef : null}
+              className="flex justify-center mb-2"
+            >
+              <WarningMsg />
             </div>
           )
         )}
@@ -90,18 +107,8 @@ function RectangleBox() {
         )}
       </div>
 
-      {/* Message limit notice */}
-      {messageCount >= 10 && (
-        <div className="text-center text-red-500 font-bold mb-2">
-          You have reached the message limit!
-        </div>
-      )}
-
       {/* Bottom input box */}
-      <BottomTextInput
-        onNewMessage={handleNewMessage}
-        isDisabled={isLoading || messageCount >= 10}
-      />
+      <BottomTextInput onNewMessage={handleNewMessage} isDisabled={isLoading || messageCount >= 10} />
     </div>
   );
 }

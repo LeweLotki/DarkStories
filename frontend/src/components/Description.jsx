@@ -27,7 +27,7 @@ function Description() {
   }, [setPuzzleId]);
 
   return (
-    <div className="flex items-center justify-center bg-gray-800 text-red-500 text-3xl font-bold rounded-lg h-[200px]">
+    <div className="flex items-center justify-center bg-transparent text-green-500/50 text-3xl font-bold font-mono rounded-lg border border-green-500/50 p-4 focus-within:ring-4 focus-within:ring-green-500/50">
       <p>{description}</p>
     </div>
   );

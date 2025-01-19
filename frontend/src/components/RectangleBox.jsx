@@ -53,14 +53,14 @@ function RectangleBox() {
 
   return (
     <div
-      className="bg-gray-600 w-[1000px] h-[700px] rounded-xl flex flex-col"
+      className="bg-transparent w-[1000px] h-[700px] rounded-xl flex flex-col"
       style={{ transform: "translateY(-2.5rem)" }} // Translate RectangleBox upward
     >
       {/* Scrollable conversation area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {/* Description box */}
         <Description />
-
+  
         {/* Messages */}
         {conversation.map((item, idx) =>
           item.type === "user" ? (
@@ -77,7 +77,7 @@ function RectangleBox() {
             </div>
           )
         )}
-
+  
         {/* Loading animation */}
         {isLoading && (
           <div className="flex justify-start mt-2">
@@ -85,11 +85,12 @@ function RectangleBox() {
           </div>
         )}
       </div>
-
+  
       {/* Bottom input box */}
       <BottomTextInput onNewMessage={handleNewMessage} isDisabled={isLoading} />
     </div>
   );
+  
 }
 
 export default RectangleBox;

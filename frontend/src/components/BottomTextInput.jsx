@@ -11,11 +11,11 @@ function BottomTextInput({ onNewMessage, isDisabled }) {
   };
 
   return (
-    <div className="bg-gray-800 rounded-md w-full p-2">
+    <div className="rounded-md w-full p-2">
       <input
         type="text"
         placeholder="Insert text here"
-        className="w-full bg-transparent text-red-500 placeholder-gray-400 outline-none"
+        className="w-full bg-transparent text-green-500/50 placeholder-green-500/50 outline-none border border-green-500/50 rounded-md p-2 text-lg font-bold font-mono focus:ring-4 focus:ring-green-500/50"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyPress={handleKeyPress}

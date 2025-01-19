@@ -4,7 +4,8 @@ import MessageBox from "./MessageBox";
 import ResponseBox from "./ResponseBox";
 import LoadingDots from "./LoadingDots";
 import Description from "./Description";
-import WarningMsg from "./WarningMsg"; // Import WarningMsg component
+import WarningMsg from "./WarningMsg";
+import Solution from "./Solution"; // Import Solution component
 import config from "../config"; // Import server configuration
 import { PuzzleContext } from "../PuzzleContext"; // Import PuzzleContext
 
@@ -12,6 +13,7 @@ function RectangleBox() {
   const [conversation, setConversation] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [messageCount, setMessageCount] = useState(0); // Count of messages sent
+  const [solution, setSolution] = useState(null); // Store the solution content
   const lastMessageRef = useRef(null);
   const { puzzleId } = useContext(PuzzleContext); // Access the puzzle ID from context
 
@@ -32,8 +34,31 @@ function RectangleBox() {
     }
   };
 
+  // Fetch solution by ID
+  const fetchSolution = async () => {
+    try {
+      const response = await fetch(`${config.SERVER_IP}/descriptions/${puzzleId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch solution from the server.");
+      }
+      const data = await response.json();
+      setSolution(data.solution); // Update the solution content
+    } catch (error) {
+      console.error(error);
+      setSolution("Failed to load the solution.");
+    }
+  };
+
   const handleNewMessage = async (text) => {
-    if (isLoading || !puzzleId || messageCount >= 5) return; // Lock input while loading or limit reached
+    if (isLoading || !puzzleId) return; // Lock input while loading or if puzzleId is not ready
+
+    // If the message count has reached the limit, treat the text as the solution
+    if (messageCount >= 5) {
+      setConversation((prev) => [...prev, { type: "user", text }]); // Add user's solution to the chat
+      await fetchSolution(); // Fetch the solution from the server
+      setConversation((prev) => [...prev, { type: "solution" }]); // Add the solution to the chat
+      return;
+    }
 
     // Add user message
     setConversation((prev) => [...prev, { type: "user", text }]);
@@ -88,13 +113,21 @@ function RectangleBox() {
             >
               <ResponseBox response={item.text} />
             </div>
-          ) : (
+          ) : item.type === "warning" ? (
             <div
               key={idx}
               ref={idx === conversation.length - 1 ? lastMessageRef : null}
               className="flex justify-center mb-2"
             >
               <WarningMsg />
+            </div>
+          ) : (
+            <div
+              key={idx}
+              ref={idx === conversation.length - 1 ? lastMessageRef : null}
+              className="flex justify-center mb-2"
+            >
+              <Solution content={solution} />
             </div>
           )
         )}
@@ -108,7 +141,7 @@ function RectangleBox() {
       </div>
 
       {/* Bottom input box */}
-      <BottomTextInput onNewMessage={handleNewMessage} isDisabled={isLoading || messageCount >= 10} />
+      <BottomTextInput onNewMessage={handleNewMessage} isDisabled={isLoading || messageCount >= 6} />
     </div>
   );
 }

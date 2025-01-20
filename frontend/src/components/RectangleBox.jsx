@@ -5,7 +5,8 @@ import ResponseBox from "./ResponseBox";
 import LoadingDots from "./LoadingDots";
 import Description from "./Description";
 import WarningMsg from "./WarningMsg";
-import Solution from "./Solution"; // Import Solution component
+import Solution from "./Solution";
+import FailedMessage from "./FailedMessage"; // Import FailedMessage component
 import config from "../config"; // Import server configuration
 import { PuzzleContext } from "../PuzzleContext"; // Import PuzzleContext
 
@@ -27,7 +28,7 @@ function RectangleBox() {
       if (!response.ok) {
         throw new Error("Failed to fetch response from the server.");
       }
-      const data = await response.text(); // The server returns a plain string
+      const data = await response.text();
       return data.replace(/^"|"$/g, ""); // Remove quotes from the string
     } catch (error) {
       console.error(error);
@@ -79,6 +80,8 @@ function RectangleBox() {
         await fetchSolution(); // Fetch the solution from the server
         setConversation((prev) => [...prev, { type: "solution" }]); // Add the solution to the chat
         setShowSolution(true); // Enable solution display
+      } else {
+        setConversation((prev) => [...prev, { type: "failed" }]); // Add failed message
       }
       return;
     }
@@ -138,6 +141,14 @@ function RectangleBox() {
               className="flex justify-center mb-2"
             >
               <WarningMsg />
+            </div>
+          ) : item.type === "failed" ? (
+            <div
+              key={idx}
+              ref={idx === conversation.length - 1 ? lastMessageRef : null}
+              className="flex justify-center mb-2"
+            >
+              <FailedMessage />
             </div>
           ) : (
             showSolution && (

@@ -39,3 +39,35 @@ def get_message(
     else:
         return 'PASS'
 
+@router.get("/solution", response_model=str)
+def get_solution(
+    message: str = Query(..., description="The user's question"),
+    id: int = Query(..., description="The ID of the dark story"),
+    db: Session = Depends(get_db)
+):
+    """
+    Endpoint to receive a user's question and an ID,
+    fetch the description and solution of the story,
+    and use the fine-tuned GPT model to respond.
+    """
+    # Fetch the description and solution from the database
+    story = crud.get_description_and_solution_by_id(db, description_id=id)
+    if not story:
+        raise HTTPException(status_code=404, detail="Dark story not found")
+
+    # Get the GPT model response
+    response = utils.use_fine_tuned_model_solution(
+        description=story["description"],
+        solution=story["solution"],
+        user_solution=message
+    )
+
+    if not response:
+        raise HTTPException(status_code=500, detail="Failed to get a response from the fine-tuned model")
+    
+    valid_responses = ['TRUE', 'FALSE']
+    if response in valid_responses:
+        return response
+    else:
+        return 'FALSE'
+

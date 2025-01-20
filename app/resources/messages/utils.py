@@ -37,3 +37,33 @@ def use_fine_tuned_model(description: str, solution: str, question: str) -> str:
         print(f"Error using the fine-tuned model: {e}")
         return None
 
+def use_fine_tuned_model_solution(description: str, solution: str, user_solution: str) -> str:
+    """
+    Use a fine-tuned GPT model to get a response based on the description, solution, and question.
+    """
+    # Define the prompt template
+    prompt = f'''
+            You are given a dark story, which description is known to the user 
+            however its solution is known only to you. User tried to solve the puzzle. 
+            Your goal is to decide wheter the user found the essence of the solution. 
+            Respond with TRUE, if the user found out the essence of the puzzle 
+            or FALSE if he failed to do so. The known description to the dark story: 
+            {description} and here is solution to the dark story: {solution} 
+            user solution is as follow: {user_solution}.
+    '''
+
+    try:
+        # Call the GPT model
+        response = openai.chat.completions.create(
+            model='ft:gpt-4o-2024-08-06:personal::ArlwY1XZ',
+            messages=[
+                {"role": "system", "content": "You are a game master."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Error using the fine-tuned model: {e}")
+        return None
+
+

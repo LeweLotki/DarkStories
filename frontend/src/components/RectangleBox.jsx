@@ -14,6 +14,7 @@ function RectangleBox() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [messageCount, setMessageCount] = useState(0); // Count of messages sent
   const [solution, setSolution] = useState(null); // Store the solution content
+  const [showSolution, setShowSolution] = useState(false); // Control whether to display the solution
   const lastMessageRef = useRef(null);
   const { puzzleId } = useContext(PuzzleContext); // Access the puzzle ID from context
 
@@ -49,14 +50,36 @@ function RectangleBox() {
     }
   };
 
+  // Fetch whether the solution should be shown
+  const fetchShouldShowSolution = async (text) => {
+    try {
+      const response = await fetch(
+        `${config.SERVER_IP}/messages/solution?message=${encodeURIComponent(text)}&id=${puzzleId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch solution status from the server.");
+      }
+      const data = await response.text(); // The server returns a plain string
+      const parsedData = data.replace(/^"|"$/g, ""); // Remove quotes from the string
+      return parsedData === "TRUE"; // Check if the response is "TRUE"
+    } catch (error) {
+      console.error(error);
+      return false; // Default to not showing the solution
+    }
+  };
+
   const handleNewMessage = async (text) => {
     if (isLoading || !puzzleId) return; // Lock input while loading or if puzzleId is not ready
 
     // If the message count has reached the limit, treat the text as the solution
     if (messageCount >= 5) {
       setConversation((prev) => [...prev, { type: "user", text }]); // Add user's solution to the chat
-      await fetchSolution(); // Fetch the solution from the server
-      setConversation((prev) => [...prev, { type: "solution" }]); // Add the solution to the chat
+      const shouldShowSolution = await fetchShouldShowSolution(text); // Fetch whether to show the solution
+      if (shouldShowSolution) {
+        await fetchSolution(); // Fetch the solution from the server
+        setConversation((prev) => [...prev, { type: "solution" }]); // Add the solution to the chat
+        setShowSolution(true); // Enable solution display
+      }
       return;
     }
 
@@ -64,17 +87,12 @@ function RectangleBox() {
     setConversation((prev) => [...prev, { type: "user", text }]);
     setIsLoading(true); // Start loading animation
 
-    // Fetch response from the server
-    const response = await fetchServerResponse(text);
-
-    // Add server response
+    const response = await fetchServerResponse(text); // Fetch response from the server
     setConversation((prev) => [...prev, { type: "response", text: response }]);
     setIsLoading(false); // Stop loading animation
 
-    // Increment message count
-    setMessageCount((prev) => prev + 1);
+    setMessageCount((prev) => prev + 1); // Increment message count
 
-    // Add warning message after reaching limit
     if (messageCount + 1 === 5) {
       setConversation((prev) => [
         ...prev,
@@ -122,13 +140,15 @@ function RectangleBox() {
               <WarningMsg />
             </div>
           ) : (
-            <div
-              key={idx}
-              ref={idx === conversation.length - 1 ? lastMessageRef : null}
-              className="flex justify-center mb-2"
-            >
-              <Solution content={solution} />
-            </div>
+            showSolution && (
+              <div
+                key={idx}
+                ref={idx === conversation.length - 1 ? lastMessageRef : null}
+                className="flex justify-center mb-2"
+              >
+                <Solution content={solution} />
+              </div>
+            )
           )
         )}
 
